@@ -5,8 +5,8 @@ import axios from 'axios';
 // import Prism from 'prismjs';
 
 class App extends Component {
-  // serverAddress = 'http://localhost:2323';
-  serverAddress = 'https://raw.githubusercontent.com/thefallenmerc/tutorials-n-guides/master/static';
+  serverAddress = 'http://localhost:2323';
+  // serverAddress = 'https://raw.githubusercontent.com/thefallenmerc/tutorials-n-guides/master/static';
   name = 'Quick How-Tos';
 
   constructor() {

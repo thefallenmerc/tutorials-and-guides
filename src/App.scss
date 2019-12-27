@@ -12,6 +12,9 @@
         padding: 15px 0 15px 16px;
         color: white;
         background-color: #008cba;
+        position: sticky;
+        top: 0;
+        z-index: 2;
       }
 
       ul {
