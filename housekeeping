@@ -15,6 +15,12 @@ const log = {
     info(text = '') {
         console.info('[Info]'.cyan, text);
     },
+    log(text = '') {
+        console.log(text);
+    },
+    success(text = '') {
+        console.info('[Success] '.green, text);
+    },
     warn(text = '') {
         console.warn('[Warning] '.yellow, text);
     }
@@ -36,7 +42,7 @@ function remove(file = null) {
         } else {
             fs.unlinkSync(file);
         }
-        log.info('Deleted: ' + file);
+        log.success('Deleted: ' + file);
         return true;
     } catch (e) {
         log.error('There was an error deleting "' + file + '"');
@@ -81,7 +87,7 @@ function copy(source = null, destination = null) {
 
         fse.copySync(source, destination);
 
-        log.info('Copied "' + source + '" to "' + destination + '"');
+        log.success('Copied "' + source + '" to "' + destination + '"');
     } catch (e) {
         log.error('There was an error copying "' + source + '" to "' + destination + '"');
         log.error(e);
@@ -90,11 +96,40 @@ function copy(source = null, destination = null) {
 
 }
 
-console.log('');
+function execSyncInDir(dir = null, command = '') {
+    log.info('Executing "' + command + '" in "' + dir + '"');
+    try {
+        if(fs.existsSync(dir) && fs.lstatSync(dir).isDirectory()) {
+            log.log(shell.execSync('cd ' + dir + ' && ' + command).toString());
+            return true;
+        } else {
+            throw new Error('Invalid Directory for exec');
+        }
+    } catch (e) {
+        log.error('There was an error executing "' + command + '" in "' + dir + '"');
+        log.error(e);
+        return false;
+    } finally {
+        log.info('Execution of "' + command + '" in "' + dir + '" complete');
+    }
+}
 
+function newLine() {
+    console.log('');
+}
+
+/**
+ * *************************************************************************************************
+ * Main Processses
+ * *************************************************************************************************
+ */
+
+newLine();
 /**
  * Start deleting files
  */
+log.warn('Initializing unlinking sequence!');
+
 const excludes = ['.git'];
 const howtosDir = path.join('..', 'howtos');
 const files = fs.readdirSync(howtosDir)
@@ -104,19 +139,30 @@ files.forEach(file => {
     }
 });
 
-console.log('\nUnlinking done!\n');
+log.warn('Unlinking sequence complete!');
 
+
+newLine();
 /**
  * Start moving build
  */
+log.warn('Initializing copy sequence!');
+
 copy(path.join('.', 'build'), path.join('..', 'howtos'));
 
-console.log('\nCopy done!\n');
+log.warn('Copy sequence complete!');
 
+newLine();
 /**
  * Push to git
  */
-log.info(shell.execSync('git add .').toString());
+log.warn('Initializing git processes');
+
+execSyncInDir(path.join('..', 'howtos'), 'git add .');
+execSyncInDir(path.join('..', 'howtos'), 'git commit -m "Automated build commit"');
+execSyncInDir(path.join('..', 'howtos'), 'git push');
+
+log.warn('git processes complete');
 
 
 process.exit();
