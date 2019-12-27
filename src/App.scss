@@ -48,6 +48,10 @@
               background-color: #555;
               color: white;
             }
+
+            &.sideBarFileLink {
+              cursor: pointer;
+            }
           }
         }
       }

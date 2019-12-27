@@ -5,12 +5,14 @@ import axios from 'axios';
 // import Prism from 'prismjs';
 
 class App extends Component {
+  // serverAddress = 'http://localhost:2323';
   serverAddress = 'https://raw.githubusercontent.com/thefallenmerc/tutorials-n-guides/master/static';
   name = 'TUTS';
 
   constructor() {
     super();
     this.state = {
+      isLoading: false,
       mainContentHeading: '',
       source: 'Please select an option first!',
       sidebarCotent: 'Loading...'
@@ -37,7 +39,10 @@ class App extends Component {
             {this.getName(this.state.mainContentHeading)}
           </div>
           <div className="mainContentContent">
-            <Markdown source={this.state.source} /></div>
+            {
+              this.state.isLoading ? 'Loading...' : <Markdown source={this.state.source} />
+            }
+          </div>
         </div>
       </div>
     );
@@ -47,20 +52,7 @@ class App extends Component {
     const list = [];
     for (const index in listOfItems) {
       const currentItem = listOfItems[index];
-      if (currentItem.type === 'directory') {
-        list.push((
-          <li key={0 + '' + index}>
-            <button>{this.getName(currentItem.name)}</button>
-            {this.makeMenu(currentItem.content)}
-          </li>
-        ));
-      } else {
-        list.push((
-          <li key={0 + '' + index}>
-            <button onClick={() => { this.setMainContent(currentItem) }}>{this.getName(currentItem.name)}</button>
-          </li>
-        ))
-      }
+      list.push(this.makeMenuItem(currentItem, index));
     }
     return (
       <ul>
@@ -69,23 +61,50 @@ class App extends Component {
     );
   }
 
+  /**
+   * Creates a menu li for object
+   * @param {object} currentItem 
+   * @param {number} index 
+   */
+  makeMenuItem(currentItem, index = 0) {
+    const isFile = currentItem.type === 'file';
+    return (
+      <li key={0 + '' + index}>
+        <button className={
+          isFile ? 'sideBarFileLink' : ''
+        }
+          onClick={isFile ? () => { this.setMainContent(currentItem) } : () => { }}
+        >{this.getName(currentItem.name)}</button>
+        {isFile ? '' : this.makeMenu(currentItem.content)}
+      </li>
+    );
+
+  }
+
   setMainContent(currentItem = '/') {
     const url = currentItem.path;
-    console.log('currentItem', currentItem);
+    this.setState({
+      isLoading: true
+    })
     // set main source
     axios.get(this.serverAddress + url).then(response => {
       this.setState({
         mainContentHeading: currentItem.name.replace(/\.md/, ''),
         source: response.data
       });
-      window.Prism.highlightAll();
     }).catch(e => {
-      console.log('something went wrong', e);
+    }).finally(() => {
+      this.setHighlightedState({ isLoading: false });
     })
   }
 
   getName(name = '') {
     return name.replace(/\.md/, '').replace(/_/g, ' ');
+  }
+
+  setHighlightedState(state) {
+    this.setState(state);
+    window.Prism.highlightAll();
   }
 
 }
