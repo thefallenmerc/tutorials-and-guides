@@ -1,0 +1,122 @@
+const fs = require('fs');
+const fse = require('fs-extra');
+const path = require('path');
+const colors = require('colors');
+const rimraf = require('rimraf');
+const shell = require('child_process');
+
+/**
+ * Custom Colored logger
+ */
+const log = {
+    error(text = '') {
+        console.error('[Error] '.red + text);
+    },
+    info(text = '') {
+        console.info('[Info]'.cyan, text);
+    },
+    warn(text = '') {
+        console.warn('[Warning] '.yellow, text);
+    }
+};
+
+/**
+ * Deletes a file or directory
+ * @param file path to the file to delete
+ */
+function remove(file = null) {
+    if (!file || typeof file !== 'string') {
+        log.error('File name must be specified!');
+        return false;
+    }
+    try {
+        const props = fs.lstatSync(file);
+        if (props.isDirectory()) {
+            rimraf.sync(file);
+        } else {
+            fs.unlinkSync(file);
+        }
+        log.info('Deleted: ' + file);
+        return true;
+    } catch (e) {
+        log.error('There was an error deleting "' + file + '"');
+        log.error(e);
+        return false;
+    }
+}
+
+function copy(source = null, destination = null) {
+    if (!source || typeof source !== 'string') {
+        log.error('Source must be specified!');
+        return false;
+    }
+    if (!destination || typeof destination !== 'string') {
+        log.error('Destination must be specified!');
+        return false;
+    }
+
+    try {
+
+        if (!fs.existsSync(source)) {
+            log.error('Source path invalid');
+            return false;
+        }
+
+        // check if destination exists, create if it doesnt
+        if (!fs.existsSync(destination)) {
+            fs.mkdirSync(destination);
+        }
+
+        const sourceProps = fs.lstatSync(source);
+        const destinationProps = fs.lstatSync(destination);
+
+        if(sourceProps.isFile()) {
+            log.error('Source must be a directory');
+            return false;
+        }
+        if(destinationProps.isFile()) {
+            log.error('Destination must be a directory');
+            return false;
+        }
+
+        fse.copySync(source, destination);
+
+        log.info('Copied "' + source + '" to "' + destination + '"');
+    } catch (e) {
+        log.error('There was an error copying "' + source + '" to "' + destination + '"');
+        log.error(e);
+        return false;
+    }
+
+}
+
+console.log('');
+
+/**
+ * Start deleting files
+ */
+const excludes = ['.git'];
+const howtosDir = path.join('..', 'howtos');
+const files = fs.readdirSync(howtosDir)
+files.forEach(file => {
+    if (!excludes.includes(file)) {
+        remove(path.join(howtosDir, file));
+    }
+});
+
+console.log('\nUnlinking done!\n');
+
+/**
+ * Start moving build
+ */
+copy(path.join('.', 'build'), path.join('..', 'howtos'));
+
+console.log('\nCopy done!\n');
+
+/**
+ * Push to git
+ */
+log.info(shell.execSync('git add .').toString());
+
+
+process.exit();

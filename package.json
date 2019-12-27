@@ -16,7 +16,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "npm run build && node housekeeping"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -34,6 +35,10 @@
     ]
   },
   "devDependencies": {
-    "babel-plugin-prismjs": "^1.1.1"
+    "babel-plugin-prismjs": "^1.1.1",
+    "colors": "^1.4.0",
+    "del-cli": "^3.0.0",
+    "fs-extra": "^8.1.0",
+    "rimraf": "^3.0.0"
   }
 }
