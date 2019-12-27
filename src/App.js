@@ -7,7 +7,7 @@ import axios from 'axios';
 class App extends Component {
   // serverAddress = 'http://localhost:2323';
   serverAddress = 'https://raw.githubusercontent.com/thefallenmerc/tutorials-n-guides/master/static';
-  name = 'TUTS';
+  name = 'Quick How-Tos';
 
   constructor() {
     super();
@@ -32,7 +32,7 @@ class App extends Component {
     return (
       <div>
         <div className="sideBar">
-          <div className="sideBarHeading">MENU</div>
+    <div className="sideBarHeading">{this.name}</div>
           {this.state.sidebarCotent}</div>
         <div className="mainContent">
           <div className={this.state.mainContentHeading ? 'mainContentHeading' : ''}>
