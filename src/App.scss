@@ -1,12 +1,14 @@
 #root {
+  font-family: Nunito, Arial, Helvetica, sans-serif;
   & > div {
     display: flex;
 
     .sideBar {
-      width: 300px;
+      width: 320px;
       background-color: #f1f1f1;
       height: 100vh;
       overflow-y: auto;
+      overflow-x: hidden;
 
       .sideBarHeading {
         padding: 15px 0 15px 16px;
@@ -16,90 +18,67 @@
         top: 0;
         z-index: 2;
       }
+      .sideBarContent {
+        font-size: small;
+        ul {
+          list-style-type: none;
+          margin: 0;
+          padding: 0 0 0 15px;
+          position: relative;
 
-      ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0 0 0 15px;
-        position: relative;
-
-        &:before {
-          display: block;
-          content: "";
-          border-left: 1px solid grey;
-          position: absolute;
-          left: 15px;
-          height: 100%;
-        }
-        // width: 200px;
-
-        & > li {
-          button {
+          &:before {
             display: block;
-            color: #000;
-            padding: 12px 0 12px 16px;
-            text-align: left;
-            width: 100%;
-            border: none;
-            text-transform: uppercase;
+            content: "";
+            border-left: 1px solid grey;
+            position: absolute;
+            left: 15px;
+            height: 100%;
+          }
+          // width: 200px;
 
-            &:focus {
-              outline: none;
-            }
+          & > li {
+            a,
+            button {
+              font-size: small;
+              display: block;
+              color: #000;
+              padding: 7px 0 7px 16px;
+              text-align: left;
+              text-decoration: none;
+              width: 100%;
+              border: none;
+              text-transform: uppercase;
 
-            &:hover:not(.active) {
-              background-color: #555;
-              color: white;
-            }
+              &:focus {
+                outline: none;
+              }
 
-            &.sideBarFileLink {
-              cursor: pointer;
+              &:hover:not(.active) {
+                background-color: #555;
+                color: white;
+              }
+
+              &.sideBarFileLink {
+                cursor: pointer;
+              }
             }
           }
         }
-      }
 
-      & > ul {
-        padding-left: 0px;
-        &::before {
-          display: none;
+        & > ul {
+          padding-left: 0px;
+          &::before {
+            display: none;
+          }
         }
       }
     }
 
     .mainContent {
-      width: calc(100% - 300px);
+      width: calc(100% - 320px);
       height: 100vh;
       box-sizing: border-box;
       overflow-y: auto;
-
-      & > .mainContentHeading {
-        padding: 15px 0 15px 16px;
-        color: white;
-        background-color: #008cba;
-        text-transform: uppercase;
-        position: sticky;
-        top: 0px;
-      }
-
-      & > .mainContentContent {
-        padding: 15px;
-        table {
-          display: block;
-          overflow: hidden;
-          img {
-            max-width: 100%;
-          }
-        }
-      }
-
-      code:not([class]) {
-        padding: 0.2em 0.4em;
-        margin: 0;
-        font-size: 85%;
-        background-color: rgba(27, 31, 35, 0.05);
-        border-radius: 3px;
-      }
     }
   }
 }

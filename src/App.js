@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import './App.scss';
-import Markdown from 'react-markdown';
 import axios from 'axios';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import MarkdownView from './components/MarkdownView';
+import config from './config/app';
 // import Prism from 'prismjs';
 
 class App extends Component {
-  serverAddress = 'http://localhost:2323';
-  // serverAddress = 'https://raw.githubusercontent.com/thefallenmerc/tutorials-n-guides/master/static';
-  name = 'Quick How-Tos';
+
+  routesList = [];
 
   constructor() {
     super();
@@ -15,35 +16,41 @@ class App extends Component {
       isLoading: false,
       mainContentHeading: '',
       source: 'Please select an option first!',
-      sidebarCotent: 'Loading...'
+      sidebarContent: 'Loading...',
+      routesList: []
     };
 
     // set sidemenu
-    axios.get(this.serverAddress + '/content.json').then(response => {
+    axios.get(config.serverAddress + '/content.json').then(response => {
       // console.log(response);
       if (Array.isArray(response.data)) {
         this.setState({
-          sidebarCotent: this.makeMenu(response.data)
+          sidebarContent: this.makeMenu(response.data)
+        });
+        this.getRouteList(response.data);
+        this.setState({
+          routesList: this.routesList
         });
       }
     });
   }
+
   render() {
     return (
       <div>
-        <div className="sideBar">
-    <div className="sideBarHeading">{this.name}</div>
-          {this.state.sidebarCotent}</div>
-        <div className="mainContent">
-          <div className={this.state.mainContentHeading ? 'mainContentHeading' : ''}>
-            {this.getName(this.state.mainContentHeading)}
+        <Router>
+          <div className="sideBar">
+            <div className="sideBarHeading">{config.name}</div>
+            <div className="sideBarContent">
+              {this.state.sidebarContent}
+            </div>
           </div>
-          <div className="mainContentContent">
-            {
-              this.state.isLoading ? 'Loading...' : <Markdown source={this.state.source} />
-            }
+          <div className="mainContent">
+            <div className="">
+              {this.renderRoutes()}
+            </div>
           </div>
-        </div>
+        </Router>
       </div>
     );
   }
@@ -70,41 +77,64 @@ class App extends Component {
     const isFile = currentItem.type === 'file';
     return (
       <li key={0 + '' + index}>
-        <button className={
-          isFile ? 'sideBarFileLink' : ''
+        {
+          isFile
+            ?
+            <Link to={this.getRouteFromFileName(currentItem.path)}>{this.getName(currentItem.name)}</Link>
+            :
+            <button>{this.getName(currentItem.name)}</button>
         }
-          onClick={isFile ? () => { this.setMainContent(currentItem) } : () => { }}
-        >{this.getName(currentItem.name)}</button>
         {isFile ? '' : this.makeMenu(currentItem.content)}
       </li>
     );
-
-  }
-
-  setMainContent(currentItem = '/') {
-    const url = currentItem.path;
-    this.setState({
-      isLoading: true
-    })
-    // set main source
-    axios.get(this.serverAddress + url).then(response => {
-      this.setState({
-        mainContentHeading: currentItem.name.replace(/\.md/, ''),
-        source: response.data
-      });
-    }).catch(e => {
-    }).finally(() => {
-      this.setHighlightedState({ isLoading: false });
-    })
   }
 
   getName(name = '') {
     return name.replace(/\.md/, '').replace(/_/g, ' ');
   }
 
-  setHighlightedState(state) {
-    this.setState(state);
-    window.Prism.highlightAll();
+  getRouteFromFileName(name = '') {
+    const nameArray = name.split('/').filter(e => e);
+    // remove src from array
+    nameArray.splice(nameArray.findIndex(e => e === 'src'), 1);
+    //  remove md from array
+    nameArray.push(nameArray.pop().replace('.md', ''));
+    return '/' + nameArray.join('/');
+  }
+
+  getRouteList(listOfItems = []) {
+    for (const item of listOfItems) {
+      if (item.type === 'directory') {
+        this.getRouteList(item.content);
+      } else {
+        const routeForFile = this.getRouteFromFileName(item.path);
+        this.routesList.push(routeForFile);
+      }
+    }
+  }
+
+  renderRoutes() {
+    const routesList = [
+      <Route key="/" exact path="/">
+        {/* {
+                    withRouter(props => {
+                      return (props)
+                  } */}
+        Please select an option
+      </Route>
+    ]
+    for (const route of this.state.routesList) {
+      routesList.push(
+        <Route key={route} exact path={route}>
+          <MarkdownView url={route}></MarkdownView>
+        </Route>
+      );
+    }
+    return (
+      <Switch>
+        {routesList}
+      </Switch>
+    );
   }
 
 }

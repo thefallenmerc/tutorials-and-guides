@@ -1,0 +1,28 @@
+
+      .mainContentHeading {
+        padding: 15px 0 15px 16px;
+        color: white;
+        background-color: #008cba;
+        text-transform: uppercase;
+        position: sticky;
+        top: 0px;
+      }
+
+      .mainContentContent {
+        padding: 15px;
+        table {
+          display: block;
+          overflow: hidden;
+          img {
+            max-width: 100%;
+          }
+        }
+      }
+
+      code:not([class]) {
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(27, 31, 35, 0.05);
+        border-radius: 3px;
+      }
