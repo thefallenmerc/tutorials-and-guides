@@ -22,10 +22,9 @@ class App extends Component {
 
     // set sidemenu
     axios.get(config.serverAddress + '/content.json').then(response => {
-      // console.log(response);
-      if (Array.isArray(response.data)) {
+      if (Array.isArray(response.data.structure)) {
         this.setState({
-          sidebarContent: this.makeMenu(response.data)
+          sidebarContent: this.makeMenu(response.data.structure)
         });
         this.getRouteList(response.data);
         this.setState({
@@ -57,6 +56,9 @@ class App extends Component {
 
   makeMenu(listOfItems = [], depth = '0') {
     const list = [];
+    if (!Array.isArray(listOfItems)) {
+      listOfItems = listOfItems.structure;
+    }
     for (const index in listOfItems) {
       const currentItem = listOfItems[index];
       list.push(this.makeMenuItem(currentItem, index));
@@ -96,13 +98,18 @@ class App extends Component {
   getRouteFromFileName(name = '') {
     const nameArray = name.split('/').filter(e => e);
     // remove src from array
-    nameArray.splice(nameArray.findIndex(e => e === 'src'), 1);
+    // nameArray.splice(nameArray.findIndex(e => e === 'src'), 1);
     //  remove md from array
     nameArray.push(nameArray.pop().replace('.md', ''));
+
     return '/' + nameArray.join('/');
   }
 
   getRouteList(listOfItems = []) {
+    if (!Array.isArray(listOfItems)) {
+      listOfItems = listOfItems.structure;
+    }
+
     for (const item of listOfItems) {
       if (item.type === 'directory') {
         this.getRouteList(item.content);
